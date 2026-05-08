@@ -641,8 +641,9 @@ function saveSleep(){
   const [bh,bm]=bed.split(':').map(Number),[wh,wm]=wake.split(':').map(Number);
   let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;
   const hrs=+(m/60).toFixed(1);
-  day().sleep={bed,wake,hrs,q:sqv||'—',notes:document.getElementById('sl-notes').value.trim()};
-  save();rWell();rDash();toast('Sleep: '+hrs+'h');
+  const yesterday=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);})();
+  day(yesterday).sleep={bed,wake,hrs,q:sqv||'—',notes:document.getElementById('sl-notes').value.trim()};
+  save();rWell();rDash();toast('Sleep: '+hrs+'h → saved to yesterday');
 }
 
 // WEIGHT
