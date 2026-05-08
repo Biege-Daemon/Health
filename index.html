@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Sajith's Cut Season</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0f;--s1:#141417;--s2:#1c1c21;--s3:#242429;
+  --border:#2c2c34;--text:#f0f0f5;--muted:#606070;--dim:#303038;
+  --lime:#c8f000;--cyan:#00d4b8;--amber:#f0a000;--red:#f04040;--green:#00c080;
+  --r:10px;--bar:60px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
+
+/* TOP BAR */
+header{flex-shrink:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--border)}
+.logo{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.logo b{color:var(--lime)}
+.hdate{font-family:'DM Sans';font-size:10px;color:var(--muted)}
+
+/* SCROLL */
+.body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--bar)+12px)}
+.body::-webkit-scrollbar{display:none}
+
+/* BOTTOM NAV */
+nav{flex-shrink:0;height:var(--bar);display:flex;border-top:1px solid var(--border);background:var(--bg)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans';font-size:10px;font-weight:500}
+.nb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb.on{color:var(--lime)}
+.nb.on svg{stroke:var(--lime)}
+
+/* PAGE */
+.pg{display:none;padding:18px}
+.pg.on{display:block}
+.pg-title{font-size:22px;font-weight:600;margin-bottom:4px}
+.pg-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+
+/* STAT ROWS */
+.stat-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.stat-row:last-child{margin-bottom:0}
+.stat-label{font-size:14px;color:var(--muted)}
+.stat-val{font-family:'DM Sans';font-size:16px;font-weight:700}
+
+/* PROGRESS */
+.bar-wrap{margin-top:10px}
+.bar-track{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.bar-meta{display:flex;justify-content:space-between;font-family:'DM Sans';font-size:10px;color:var(--muted);margin-top:5px}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* METRIC BOX */
+.mbox{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 10px;text-align:center}
+.mbox-val{font-family:'DM Sans';font-size:20px;font-weight:700;line-height:1;margin-bottom:4px}
+.mbox-lbl{font-size:11px;color:var(--muted);font-weight:500}
+
+/* FORM */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+input,select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans';font-size:15px;padding:11px 13px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--lime)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23606070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select option{background:var(--s2)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTON */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:8px;font-family:'DM Sans';font-size:14px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn-lime{background:var(--lime);color:#0c0c0f}
+.btn-ghost{background:var(--s3);color:var(--text)}
+.btn-sm{padding:9px 14px;font-size:13px;width:auto}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(240,64,64,.3)}
+.row{display:flex;gap:8px}
+.row input{flex:1}
+
+/* LOG LIST */
+.log{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.log-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border)}
+.log-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.log-meta{font-family:'DM Sans';font-size:10px;color:var(--muted);margin-top:2px}
+.log-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.log-val{font-family:'DM Sans';font-size:13px;font-weight:700}
+.del{background:none;border:none;color:var(--dim);cursor:pointer;padding:4px;line-height:0;transition:color .15s}
+.del:active{color:var(--red)}
+.del svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+/* WATER GLASSES */
+.glasses{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.glass{aspect-ratio:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.glass svg{width:22px;height:22px;fill:none;stroke:var(--dim);stroke-width:1.6;stroke-linecap:round;transition:stroke .15s}
+.glass.on{background:rgba(0,212,184,.1);border-color:rgba(0,212,184,.4)}
+.glass.on svg{stroke:var(--cyan)}
+.glass:active{transform:scale(.92)}
+
+/* SLEEP Q */
+.sq{display:flex;gap:6px;margin-top:6px}
+.sq-btn{flex:1;padding:10px 4px;border-radius:8px;border:1px solid var(--border);background:var(--s2);color:var(--muted);cursor:pointer;font-family:'DM Sans';font-size:12px;font-weight:500;text-align:center;transition:all .15s}
+.sq-btn.on{border-color:var(--lime);color:var(--lime);background:rgba(200,240,0,.06)}
+.sq-btn:active{transform:scale(.95)}
+
+/* HR */
+hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* WEEK CHART */
+.wchart{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.wchart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.wchart-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.wchart-avg{font-family:'DM Sans';font-size:11px;font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:5px;height:72px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.bar-col-inner{flex:1;width:100%;display:flex;align-items:flex-end;position:relative}
+.bar-b{width:100%;border-radius:4px 4px 0 0;min-height:0;transition:height .4s ease}
+.bar-day{font-family:'DM Sans';font-size:8px;color:var(--muted);text-transform:uppercase}
+.bar-day.today{color:var(--lime)}
+.no-data{text-align:center;padding:20px;font-family:'DM Sans';font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+
+/* DASH SPECIFIC */
+.def-block{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.def-num{font-family:'DM Sans';font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
+.def-label{font-size:12px;color:var(--muted)}
+.week-scores{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.ws-day{display:flex;flex-direction:column;align-items:center;gap:5px}
+.ws-name{font-family:'DM Sans';font-size:8px;color:var(--muted);text-transform:uppercase}
+.ws-dot{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'DM Sans';font-size:11px;font-weight:700;color:var(--muted)}
+.ws-dot.today{border-color:var(--lime);border-width:2px}
+
+/* SUMMARY ROWS */
+.sum-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.sum-row svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sum-lbl{flex:1;font-size:13px;color:var(--muted)}
+.sum-val{font-family:'DM Sans';font-size:13px;font-weight:700}
+
+/* CHIP */
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-family:'DM Sans';font-size:9px}
+.chip-g{background:rgba(0,192,128,.12);color:var(--green);border:1px solid rgba(0,192,128,.2)}
+.chip-w{background:rgba(240,160,0,.1);color:var(--amber);border:1px solid rgba(240,160,0,.2)}
+.chip-r{background:rgba(240,64,64,.1);color:var(--red);border:1px solid rgba(240,64,64,.2)}
+
+/* HIST TABLE */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:500px;font-size:12px}
+th{font-family:'DM Sans';font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+td{font-family:'DM Sans';font-size:10px;padding:10px 12px;border-bottom:1px solid rgba(44,44,52,.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--bar)+12px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--s3);border:1px solid var(--lime);color:var(--lime);padding:9px 18px;border-radius:8px;font-family:'DM Sans';font-size:11px;z-index:999;opacity:0;transition:all .22s ease;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.empty{text-align:center;padding:24px;color:var(--dim);font-family:'DM Sans';font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Sajith's Cut Season</div>
+  <div class="hdate" id="hdate"></div>
+</header>
+
+<div class="body" id="body">
+
+<!-- ── DASHBOARD ── -->
+<div class="pg on" id="pg-dash">
+  <div class="pg-title" id="greeting">Today</div>
+  <div class="pg-sub">Here's where you stand</div>
+
+  <!-- Deficit -->
+  <div class="def-block">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Calorie Deficit · BMR + Steps + Exercise + TEF + NEAT − Intake</div>
+        <div class="def-num" id="d-deficit" style="color:var(--lime)">—</div>
+        <div class="def-label" id="d-def-sub">Set calorie goal first</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Target</div>
+        <div style="font-family:'DM Sans';font-size:20px;font-weight:700;color:var(--lime)">≥1,100</div>
+        <div style="font-size:11px;color:var(--muted)">kcal/day</div>
+      </div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-track"><div class="bar-fill" id="d-def-bar" style="background:var(--lime);width:0%"></div></div>
+      <div class="bar-meta"><span>0</span><span>550</span><span>1,100 kcal ✓</span></div>
+    </div>
+  </div>
+
+  <!-- Today's metrics -->
+  <div class="card">
+    <div class="card-title">Today</div>
+    <div class="stat-row">
+      <span class="stat-label">Calories in</span>
+      <span class="stat-val" id="d-cal-in" style="color:var(--lime)">—</span>
+    </div>
+    <div class="stat-row" style="flex-direction:column;align-items:flex-start;gap:3px">
+      <div style="display:flex;width:100%;justify-content:space-between;align-items:baseline">
+        <span class="stat-label">Total burned</span>
+        <span class="stat-val" id="d-cal-burn" style="color:var(--red)">—</span>
+      </div>
+      <div id="d-cal-burn-sub" style="font-size:11px;color:var(--muted);line-height:1.4"></div>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Steps</span>
+      <span class="stat-val" id="d-steps" style="color:var(--cyan)">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Water</span>
+      <span class="stat-val" id="d-water" style="color:var(--cyan)">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Sleep</span>
+      <span class="stat-val" id="d-sleep" style="color:var(--amber)">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Exercise</span>
+      <span class="stat-val" id="d-exercise" style="color:var(--green)">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Weight</span>
+      <span class="stat-val" id="d-weight" style="color:var(--text)">—</span>
+    </div>
+  </div>
+
+  <!-- Week scores -->
+  <div class="card">
+    <div class="card-title">This Week</div>
+    <div class="week-scores" id="d-week"></div>
+    <div id="d-week-avgs"></div>
+  </div>
+</div>
+
+<!-- ── CALORIES ── -->
+<div class="pg" id="pg-cal">
+  <div class="pg-title">Calories</div>
+  <div class="pg-sub">Log what you eat.</div>
+
+  <div class="wchart">
+    <div class="wchart-head">
+      <div class="wchart-title">This week</div>
+      <div class="wchart-avg" id="wc-cal-avg" style="color:var(--lime)">Avg —</div>
+    </div>
+    <div id="wc-cal"></div>
+  </div>
+
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:14px;color:var(--muted)">Daily target</div>
+    <div style="font-size:16px;font-weight:700;color:var(--lime)">1,600 kcal &nbsp;<span id="cal-left-disp" style="font-size:13px;font-weight:500;color:var(--cyan)"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Meal</div>
+    <div class="field"><label class="fl">Food name</label><input type="text" id="m-name" placeholder="e.g. Oats with banana"></div>
+    <div class="r2">
+      <div class="field"><label class="fl">Calories</label><input type="number" id="m-cal" placeholder="350" inputmode="numeric"></div>
+      <div class="field"><label class="fl">Type</label>
+        <select id="m-type"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option></select>
+      </div>
+    </div>
+    <div class="r2">
+      <div class="field"><label class="fl">Protein g</label><input type="number" id="m-prot" placeholder="0" inputmode="numeric"></div>
+      <div class="field"><label class="fl">Carbs g</label><input type="number" id="m-carbs" placeholder="0" inputmode="numeric"></div>
+    </div>
+    <button class="btn btn-lime" onclick="addMeal()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Today's Log</div>
+    <div class="log" id="meal-log"><div class="empty">No meals yet</div></div>
+    <hr>
+    <div class="g3" style="text-align:center">
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="cs-total">0</div><div style="font-size:11px;color:var(--muted)">kcal</div></div>
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="cs-prot">0</div><div style="font-size:11px;color:var(--muted)">prot g</div></div>
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="cs-carbs">0</div><div style="font-size:11px;color:var(--muted)">carbs g</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACTIVITY ── -->
+<div class="pg" id="pg-act">
+  <div class="pg-title">Activity</div>
+  <div class="pg-sub">Steps and exercise.</div>
+
+  <div class="wchart">
+    <div class="wchart-head"><div class="wchart-title">Steps this week</div><div class="wchart-avg" id="wc-steps-avg" style="color:var(--cyan)">Avg —</div></div>
+    <div id="wc-steps"></div>
+  </div>
+  <div class="wchart">
+    <div class="wchart-head"><div class="wchart-title">Exercise mins this week</div><div class="wchart-avg" id="wc-ex-avg" style="color:var(--green)">Avg —</div></div>
+    <div id="wc-ex"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Steps — Target: 10,000</div>
+    <div class="field"><label class="fl">Steps today</label><input type="number" id="steps-inp" placeholder="8500" inputmode="numeric"></div>
+    <button class="btn btn-lime" onclick="saveSteps()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Save</button>
+    <div class="bar-wrap" style="margin-top:14px">
+      <div class="bar-track"><div class="bar-fill" id="steps-bar" style="background:var(--cyan);width:0%"></div></div>
+      <div class="bar-meta"><span id="steps-disp">0 steps</span><span id="steps-pct">0% of 10,000</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Exercise — Target: 30 min/day</div>
+    <div class="r2">
+      <div class="field"><label class="fl">Type</label>
+        <select id="ex-type"><option>Running</option><option>Walking</option><option>Cycling</option><option>Swimming</option><option>Weights</option><option>HIIT</option><option>Yoga</option><option>Sports</option><option>Other</option></select>
+      </div>
+      <div class="field"><label class="fl">Intensity</label><select id="ex-int"><option>Low</option><option selected>Moderate</option><option>High</option></select></div>
+    </div>
+    <div class="r2">
+      <div class="field"><label class="fl">Duration (min)</label><input type="number" id="ex-dur" placeholder="45" inputmode="numeric"></div>
+      <div class="field"><label class="fl">Calories burned</label><input type="number" id="ex-cal" placeholder="320" inputmode="numeric"></div>
+    </div>
+    <div class="field"><label class="fl">Notes</label><input type="text" id="ex-notes" placeholder="Optional"></div>
+    <button class="btn btn-lime" onclick="addEx()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log</button>
+    <div class="log" id="ex-log"><div class="empty" style="margin-top:12px">No exercise logged</div></div>
+    <hr>
+    <div class="g3" style="text-align:center">
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="ex-sessions">0</div><div style="font-size:11px;color:var(--muted)">sessions</div></div>
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="ex-mins">0</div><div style="font-size:11px;color:var(--muted)">mins</div></div>
+      <div><div style="font-family:'DM Sans';font-size:18px;font-weight:700" id="ex-kcal" style="color:var(--red)">0</div><div style="font-size:11px;color:var(--muted)">burned</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WELLNESS ── -->
+<div class="pg" id="pg-well">
+  <div class="pg-title">Wellness</div>
+  <div class="pg-sub">Water, sleep, weight.</div>
+
+  <div class="wchart">
+    <div class="wchart-head"><div class="wchart-title">Water this week (ml)</div><div class="wchart-avg" id="wc-water-avg" style="color:var(--cyan)">Avg —</div></div>
+    <div id="wc-water"></div>
+  </div>
+  <div class="wchart">
+    <div class="wchart-head"><div class="wchart-title">Sleep this week (hrs)</div><div class="wchart-avg" id="wc-sleep-avg" style="color:var(--amber)">Avg —</div></div>
+    <div id="wc-sleep"></div>
+  </div>
+  <div class="wchart">
+    <div class="wchart-head"><div class="wchart-title">Weight this week (kg)</div><div class="wchart-avg" id="wc-wt-avg" style="color:var(--text)">Avg —</div></div>
+    <div id="wc-wt"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Water — Target: 2,500 ml</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Tap a glass to add 250ml</div>
+    <div class="glasses" id="glasses"></div>
+    <div class="row">
+      <input type="number" id="water-custom" placeholder="Custom ml" inputmode="numeric">
+      <button class="btn btn-ghost btn-sm" onclick="addWaterCustom()">Add</button>
+      <button class="btn btn-danger btn-sm" onclick="resetWater()">Reset</button>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-track"><div class="bar-fill" id="water-bar" style="background:var(--cyan);width:0%"></div></div>
+      <div class="bar-meta"><span id="water-disp">0 ml</span><span id="water-pct">0%</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sleep — Target: 8 hrs</div>
+    <div class="r2">
+      <div class="field"><label class="fl">Bedtime</label><input type="time" id="sl-bed" value="22:30"></div>
+      <div class="field"><label class="fl">Wake up</label><input type="time" id="sl-wake" value="06:30"></div>
+    </div>
+    <div class="field">
+      <label class="fl">Quality</label>
+      <div class="sq">
+        <div class="sq-btn" onclick="setSQ('Poor',this)">Poor</div>
+        <div class="sq-btn" onclick="setSQ('Fair',this)">Fair</div>
+        <div class="sq-btn" onclick="setSQ('Good',this)">Good</div>
+        <div class="sq-btn" onclick="setSQ('Great',this)">Great</div>
+      </div>
+    </div>
+    <div class="field"><label class="fl">Notes</label><input type="text" id="sl-notes" placeholder="Optional"></div>
+    <button class="btn btn-lime" onclick="saveSleep()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Save</button>
+    <hr>
+    <div class="g2">
+      <div class="mbox"><div class="mbox-val" id="sl-hrs" style="color:var(--amber)">—</div><div class="mbox-lbl">Hours</div></div>
+      <div class="mbox"><div class="mbox-val" id="sl-q">—</div><div class="mbox-lbl">Quality</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Weight</div>
+    <div class="r2">
+      <div class="field"><label class="fl">Today (kg)</label><input type="number" id="wt-inp" placeholder="75.4" step="0.1" inputmode="decimal"></div>
+      <div class="field"><label class="fl">Notes</label><input type="text" id="wt-notes" placeholder="Optional"></div>
+    </div>
+    <button class="btn btn-lime" onclick="saveWeight()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Save</button>
+    <hr>
+    <div class="g3" style="text-align:center">
+      <div><div style="font-family:'DM Sans';font-size:16px;font-weight:700" id="wt-today">—</div><div style="font-size:11px;color:var(--muted)">today</div></div>
+      <div><div style="font-family:'DM Sans';font-size:16px;font-weight:700;color:var(--muted)" id="wt-start">—</div><div style="font-size:11px;color:var(--muted)">start</div></div>
+      <div><div style="font-family:'DM Sans';font-size:16px;font-weight:700" id="wt-diff">—</div><div style="font-size:11px;color:var(--muted)">change</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HISTORY ── -->
+<div class="pg" id="pg-hist">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div><div class="pg-title">History</div><div class="pg-sub" style="margin-bottom:0">Day by day.</div></div>
+    <button class="btn btn-danger btn-sm" onclick="clearAll()" style="margin-top:4px">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>Clear
+    </button>
+  </div>
+  <div class="card">
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Date</th><th>kg</th><th>Cal In</th><th>Burned</th><th>Steps</th><th>Water</th><th>Sleep</th><th>Deficit</th></tr></thead>
+        <tbody id="hist-body"></tbody>
+      </table>
+      <div class="empty" id="hist-empty">No history yet.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end body -->
+
+<nav>
+  <button class="nb on" id="nb-dash" onclick="go('dash',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dash
+  </button>
+  <button class="nb" id="nb-cal" onclick="go('cal',this)">
+    <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Calories
+  </button>
+  <button class="nb" id="nb-act" onclick="go('act',this)">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity
+  </button>
+  <button class="nb" id="nb-well" onclick="go('well',this)">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Wellness
+  </button>
+  <button class="nb" id="nb-hist" onclick="go('hist',this)">
+    <svg viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 16 3 11 8 11"/></svg>History
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const td=()=>new Date().toISOString().slice(0,10);
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+const G={cal:1600};
+const TARGETS={steps:10000,water:2500,sleep:8,exercise:30,deficit:1100};
+let D=ld('vt_d',{});
+let sqv='';
+
+function day(d=td()){
+  if(!D[d])D[d]={meals:[],ex:[],steps:null,water:0,sleep:null,weight:null};
+  return D[d];
+}
+function save(){sv('vt_d',D);}
+
+// NAV
+function go(pg,el){
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('pg-'+pg).classList.add('on');
+  document.getElementById('body').scrollTop=0;
+  ({dash:rDash,cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
+}
+
+// TOAST
+let tt;
+function toast(m){
+  const e=document.getElementById('toast');
+  clearTimeout(tt);e.textContent=m;e.classList.add('on');
+  tt=setTimeout(()=>e.classList.remove('on'),2000);
+}
+
+// INIT
+function init(){
+  const d=new Date(),h=d.getHours();
+  document.getElementById('greeting').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('hdate').textContent=d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+}
+
+// WEEK HELPERS
+function last7(){
+  return Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return d.toISOString().slice(0,10);});
+}
+function wavg(vals){
+  const v=vals.filter(x=>x!=null&&x>0);
+  return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null;
+}
+
+// WEEK BAR CHART
+function drawBars(containerId,values,color,today){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const hasData=values.some(v=>v>0);
+  if(!hasData){el.innerHTML='<div class="no-data">No data this week</div>';return;}
+  const max=Math.max(...values,1);
+  const days=['S','S','M','T','W','T','F','S','S','S','S'].slice(0,7);
+  const dates=last7();
+  const dnames=dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short'}).slice(0,1).toUpperCase());
+  el.innerHTML=`<div class="bars">${values.map((v,i)=>{
+    const pct=v>0?Math.round((v/max)*100):0;
+    const isToday=dates[i]===today;
+    const col=isToday?color:color+'55';
+    return`<div class="bar-col">
+      <div class="bar-col-inner"><div class="bar-b" style="width:100%;height:${pct}%;background:${col}"></div></div>
+      <div class="bar-day ${isToday?'today':''}">${dnames[i]}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// MEALS
+function addMeal(){
+  const name=document.getElementById('m-name').value.trim();
+  const cal=parseInt(document.getElementById('m-cal').value);
+  const type=document.getElementById('m-type').value;
+  const prot=parseFloat(document.getElementById('m-prot').value)||0;
+  const carbs=parseFloat(document.getElementById('m-carbs').value)||0;
+  if(!name||!cal){toast('Enter name and calories');return;}
+  day().meals.push({id:Date.now(),name,cal,type,prot,carbs,t:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})});
+  save();
+  ['m-name','m-cal','m-prot','m-carbs'].forEach(i=>document.getElementById(i).value='');
+  rCal();rDash();toast('Added: '+name);
+}
+function delMeal(id){day().meals=day().meals.filter(m=>m.id!==id);save();rCal();rDash();}
+
+function rCal(){
+  const d=day(),g=G.cal;
+  const tot=d.meals.reduce((a,m)=>a+m.cal,0);
+  const prot=d.meals.reduce((a,m)=>a+m.prot,0);
+  const carbs=d.meals.reduce((a,m)=>a+m.carbs,0);
+  const rem=g-tot;
+  const le=document.getElementById('cal-left-disp');
+  le.textContent=rem>=0?rem+' left':'⚠ '+Math.abs(rem)+' over';
+  le.style.color=rem<0?'var(--red)':'var(--cyan)';
+  document.getElementById('cs-total').textContent=tot;
+  document.getElementById('cs-prot').textContent=Math.round(prot);
+  document.getElementById('cs-carbs').textContent=Math.round(carbs);
+  const log=document.getElementById('meal-log');
+  log.innerHTML=!d.meals.length?'<div class="empty">No meals yet</div>':
+    d.meals.map(m=>`<div class="log-item">
+      <div style="min-width:0"><div class="log-name">${m.name}</div><div class="log-meta">${m.type} · ${m.t}</div></div>
+      <div class="log-right"><div class="log-val" style="color:var(--lime)">${m.cal}</div>
+      <button class="del" onclick="delMeal(${m.id})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    </div>`).join('');
+  // chart
+  const today=td();
+  const vals=last7().map(d=>D[d]?D[d].meals.reduce((a,m)=>a+m.cal,0):0);
+  const avg=wavg(vals);
+  document.getElementById('wc-cal-avg').textContent=avg?'Avg '+avg+' kcal':'Avg —';
+  drawBars('wc-cal',vals,'#c8f000',today);
+}
+
+// STEPS
+function saveSteps(){
+  const v=parseInt(document.getElementById('steps-inp').value);
+  if(isNaN(v)||v<0){toast('Enter valid steps');return;}
+  day().steps=v;save();rAct();rDash();toast('Steps: '+v.toLocaleString());
+}
+
+// EXERCISE
+function addEx(){
+  const type=document.getElementById('ex-type').value;
+  const dur=parseInt(document.getElementById('ex-dur').value);
+  const cal=parseInt(document.getElementById('ex-cal').value);
+  const intensity=document.getElementById('ex-int').value;
+  const notes=document.getElementById('ex-notes').value.trim();
+  if(!dur||!cal){toast('Enter duration and calories');return;}
+  day().ex.push({id:Date.now(),type,dur,cal,intensity,notes,t:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})});
+  save();
+  ['ex-dur','ex-cal','ex-notes'].forEach(i=>document.getElementById(i).value='');
+  rAct();rDash();toast('Logged: '+type);
+}
+function delEx(id){day().ex=day().ex.filter(e=>e.id!==id);save();rAct();rDash();}
+
+function rAct(){
+  const d=day(),today=td();
+  if(d.steps!=null)document.getElementById('steps-inp').value=d.steps;
+  const steps=d.steps??0,pct=Math.min(100,Math.round((steps/TARGETS.steps)*100));
+  document.getElementById('steps-bar').style.width=pct+'%';
+  document.getElementById('steps-disp').textContent=steps.toLocaleString()+' steps';
+  document.getElementById('steps-pct').textContent=pct+'% of 10,000';
+  const log=document.getElementById('ex-log');
+  log.innerHTML=!d.ex.length?'<div class="empty" style="margin-top:12px">No exercise logged</div>':
+    d.ex.map(e=>`<div class="log-item">
+      <div style="min-width:0"><div class="log-name">${e.type}</div><div class="log-meta">${e.dur}min · ${e.intensity}${e.notes?' · '+e.notes:''}</div></div>
+      <div class="log-right"><div class="log-val" style="color:var(--red)">${e.cal}</div>
+      <button class="del" onclick="delEx(${e.id})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    </div>`).join('');
+  document.getElementById('ex-sessions').textContent=d.ex.length;
+  document.getElementById('ex-mins').textContent=d.ex.reduce((a,e)=>a+e.dur,0);
+  document.getElementById('ex-kcal').textContent=d.ex.reduce((a,e)=>a+e.cal,0);
+  // charts
+  const sv2=last7().map(d=>D[d]&&D[d].steps!=null?D[d].steps:0);
+  const avgS=wavg(sv2);
+  document.getElementById('wc-steps-avg').textContent=avgS?'Avg '+avgS.toLocaleString():'Avg —';
+  drawBars('wc-steps',sv2,'#00d4b8',today);
+  const ev=last7().map(d=>D[d]?D[d].ex.reduce((a,e)=>a+e.dur,0):0);
+  const avgE=wavg(ev);
+  document.getElementById('wc-ex-avg').textContent=avgE?'Avg '+avgE+' min':'Avg —';
+  drawBars('wc-ex',ev,'#00c080',today);
+}
+
+// WATER
+function addWater(ml){day().water=(day().water||0)+ml;save();rWell();rDash();}
+function addWaterCustom(){
+  const v=parseInt(document.getElementById('water-custom').value);
+  if(!v||v<=0){toast('Enter amount');return;}
+  addWater(v);document.getElementById('water-custom').value='';toast('+'+v+'ml');
+}
+function resetWater(){day().water=0;save();rWell();rDash();toast('Water reset');}
+function drawGlasses(){
+  const filled=Math.floor((day().water||0)/250);
+  document.getElementById('glasses').innerHTML=Array.from({length:8},(_,i)=>`
+    <div class="glass ${i<filled?'on':''}" onclick="addWater(250)">
+      <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+    </div>`).join('');
+}
+
+// SLEEP
+function setSQ(q,el){
+  sqv=q;
+  document.querySelectorAll('.sq-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+function saveSleep(){
+  const bed=document.getElementById('sl-bed').value,wake=document.getElementById('sl-wake').value;
+  if(!bed||!wake){toast('Set both times');return;}
+  const [bh,bm]=bed.split(':').map(Number),[wh,wm]=wake.split(':').map(Number);
+  let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;
+  const hrs=+(m/60).toFixed(1);
+  day().sleep={bed,wake,hrs,q:sqv||'—',notes:document.getElementById('sl-notes').value.trim()};
+  save();rWell();rDash();toast('Sleep: '+hrs+'h');
+}
+
+// WEIGHT
+function saveWeight(){
+  const v=parseFloat(document.getElementById('wt-inp').value);
+  if(!v||v<=0){toast('Enter valid weight');return;}
+  day().weight=v;day().wNotes=document.getElementById('wt-notes').value.trim();
+  save();rWell();rHist();toast('Weight: '+v+' kg');
+}
+
+function rWell(){
+  const d=day(),wg=TARGETS.water,w=d.water||0,today=td();
+  const pct=Math.min(100,Math.round((w/wg)*100));
+  document.getElementById('water-bar').style.width=pct+'%';
+  document.getElementById('water-disp').textContent=w+' ml';
+  document.getElementById('water-pct').textContent=pct+'%';
+  drawGlasses();
+  if(d.sleep){
+    document.getElementById('sl-hrs').textContent=d.sleep.hrs+'h';
+    document.getElementById('sl-q').textContent=d.sleep.q;
+    document.getElementById('sl-bed').value=d.sleep.bed;
+    document.getElementById('sl-wake').value=d.sleep.wake;
+    document.querySelectorAll('.sq-btn').forEach(b=>{if(b.textContent===d.sleep.q){b.classList.add('on');sqv=d.sleep.q;}});
+  }
+  const allW=Object.entries(D).filter(([,v])=>v.weight).sort(([a],[b])=>a.localeCompare(b));
+  const s=allW.length?allW[0][1].weight:null,tw=d.weight;
+  document.getElementById('wt-today').textContent=tw?tw+' kg':'—';
+  document.getElementById('wt-start').textContent=s?s+' kg':'—';
+  if(s&&tw){const diff=(tw-s).toFixed(1);const el=document.getElementById('wt-diff');el.textContent=(diff<=0?'':'+')+(+diff)+' kg';el.style.color=diff<=0?'var(--green)':'var(--red)';}
+  else document.getElementById('wt-diff').textContent='—';
+  // charts
+  const wv=last7().map(d=>D[d]?D[d].water||0:0);
+  const avgW=wavg(wv);
+  document.getElementById('wc-water-avg').textContent=avgW?'Avg '+avgW+'ml':'Avg —';
+  drawBars('wc-water',wv,'#00d4b8',today);
+  const slv=last7().map(d=>D[d]&&D[d].sleep?D[d].sleep.hrs:0);
+  const avgSl=wavg(slv);
+  document.getElementById('wc-sleep-avg').textContent=avgSl?'Avg '+avgSl+'h':'Avg —';
+  drawBars('wc-sleep',slv,'#f0a000',today);
+  const wtv=last7().map(d=>D[d]&&D[d].weight?D[d].weight:0);
+  const avgWt=wavg(wtv);
+  document.getElementById('wc-wt-avg').textContent=avgWt?'Avg '+avgWt+' kg':'Avg —';
+  drawBars('wc-wt',wtv,'#a0a0b8',today);
+}
+
+// DASHBOARD
+const BMR=1818; // Mifflin-St Jeor: male, 75kg, 175cm, 23yo
+
+function rDash(){
+  const d=day(),g=G.cal;
+  const calIn=d.meals.reduce((a,m)=>a+m.cal,0);
+  const calBurn=d.ex.reduce((a,e)=>a+e.cal,0);
+  // Full calorie burn breakdown
+  const stepsBurn=d.steps!=null?Math.round(d.steps*0.045):0;
+  const tef=Math.round(calIn*0.10);
+  const neatBase=200;
+  const totalBurn=BMR+calBurn+stepsBurn+tef+neatBase;
+  // Real deficit = total burn - net intake (intake already reduced by TEF above)
+  const deficit=d.meals.length>0?(totalBurn-calIn):null;
+  const steps=d.steps,water=d.water||0,sleep=d.sleep,wt=d.weight;
+  const exMins=d.ex.reduce((a,e)=>a+e.dur,0);
+
+  document.getElementById('d-cal-in').textContent=calIn?calIn+' kcal':'—';
+  document.getElementById('d-cal-burn').textContent=totalBurn+' kcal total';
+  document.getElementById('d-cal-burn-sub').textContent=`BMR ${BMR}  +  steps ${stepsBurn}  +  ex ${calBurn}  +  TEF ${tef}  +  NEAT ${neatBase}`;
+  document.getElementById('d-steps').textContent=steps!=null?steps.toLocaleString()+' / '+TARGETS.steps.toLocaleString():'—';
+  document.getElementById('d-water').textContent=water?water+' / '+TARGETS.water+'ml':'0 / '+TARGETS.water+'ml';
+  document.getElementById('d-sleep').textContent=sleep?sleep.hrs+'h ('+sleep.q+')':'—';
+  document.getElementById('d-exercise').textContent=d.ex.length?exMins+' min, '+calBurn+' kcal':'—';
+  document.getElementById('d-weight').textContent=wt?wt+' kg':'—';
+
+  // deficit
+  const de=document.getElementById('d-deficit'),ds=document.getElementById('d-def-sub');
+  if(deficit!=null){
+    de.textContent=(deficit>=0?'+':'')+deficit+' kcal';
+    const col=deficit>=1100?'var(--lime)':deficit>=500?'var(--amber)':deficit<0?'var(--red)':'var(--amber)';
+    de.style.color=col;
+    ds.textContent=deficit>=1100?'On track for 1 kg/week loss':deficit>=500?'Getting there — push more':deficit<0?'Surplus — ate more than you burned':'Small deficit, push harder';
+    document.getElementById('d-def-bar').style.width=Math.min(100,Math.max(0,(deficit/1100)*100))+'%';
+    document.getElementById('d-def-bar').style.background=col;
+  } else {
+    de.textContent='—';de.style.color='var(--muted)';ds.textContent='Log a meal to calculate your deficit';
+    document.getElementById('d-def-bar').style.width='0%';
+  }
+
+  // week dots — simple score per day
+  const dates=last7(),today=td();
+  const dnames=dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short'}).slice(0,1).toUpperCase());
+  document.getElementById('d-week').innerHTML=dates.map((date,i)=>{
+    const dd=D[date];
+    let score=null;
+    if(dd){
+      let s=0,n=0;
+      const ci=dd.meals.reduce((a,m)=>a+m.cal,0);
+      if(g&&ci>0){s+=ci<=g*1.05?20:ci<=g*1.2?12:5;n+=20;}
+      if(dd.steps!=null){const r=dd.steps/TARGETS.steps;s+=r>=1?20:r>=.75?15:r>=.5?10:5;n+=20;}
+      if(dd.water>0){const r=dd.water/TARGETS.water;s+=r>=1?20:r>=.75?14:r>=.5?8:3;n+=20;}
+      if(dd.sleep){s+=dd.sleep.hrs>=7?20:dd.sleep.hrs>=6?13:7;n+=20;}
+      const em=dd.ex.reduce((a,e)=>a+e.dur,0);
+      if(dd.ex.length){s+=em>=30?20:em>=15?12:6;n+=20;}
+      if(n>0)score=Math.round((s/n)*100);
+    }
+    const col=score==null?'var(--dim)':score>=80?'var(--lime)':score>=60?'var(--amber)':score>=40?'var(--red)':'var(--red)';
+    const isToday=date===today;
+    return`<div class="ws-day">
+      <div class="ws-name">${dnames[i]}</div>
+      <div class="ws-dot ${isToday?'today':''}" style="border-color:${score!=null?col:'var(--border)'};color:${col}">
+        ${score!=null?score:'—'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // week averages
+  const w7=dates.map(d=>D[d]);
+  const avgCal=wavg(w7.map(d=>d?d.meals.reduce((a,m)=>a+m.cal,0):null));
+  const avgSteps=wavg(w7.map(d=>d&&d.steps!=null?d.steps:null));
+  const avgWater=wavg(w7.map(d=>d?d.water||0:null));
+  const avgSleep=wavg(w7.map(d=>d&&d.sleep?d.sleep.hrs:null));
+  const avgEx=wavg(w7.map(d=>d?d.ex.reduce((a,e)=>a+e.dur,0):null));
+  const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  const rows=[
+    {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Avg calories',v:avgCal?avgCal+' kcal':'—',c:g&&avgCal?(avgCal<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
+    {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Avg steps',v:avgSteps?avgSteps.toLocaleString():'—',c:avgSteps?(avgSteps>=TARGETS.steps?'var(--lime)':avgSteps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+    {i:icon('<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'),l:'Avg water',v:avgWater?avgWater+'ml':'—',c:avgWater?(avgWater>=TARGETS.water?'var(--lime)':avgWater>=TARGETS.water*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+    {i:icon('<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>'),l:'Avg sleep',v:avgSleep?avgSleep+'h':'—',c:avgSleep?(avgSleep>=7?'var(--lime)':avgSleep>=6?'var(--amber)':'var(--red)'):'var(--muted)'},
+    {i:icon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),l:'Avg exercise',v:avgEx?avgEx+' min':'—',c:avgEx?(avgEx>=30?'var(--lime)':avgEx>=15?'var(--amber)':'var(--red)'):'var(--muted)'},
+  ];
+  document.getElementById('d-week-avgs').innerHTML=rows.map(r=>`
+    <div class="sum-row" style="border-left:2px solid ${r.c}">
+      <span style="color:${r.c}">${r.i}</span>
+      <span class="sum-lbl">${r.l}</span>
+      <span class="sum-val" style="color:${r.c}">${r.v}</span>
+    </div>`).join('');
+}
+
+// HISTORY
+function rHist(){
+  const entries=Object.entries(D).sort(([a],[b])=>b.localeCompare(a));
+  const tbody=document.getElementById('hist-body'),empty=document.getElementById('hist-empty');
+  if(!entries.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=entries.map(([date,d])=>{
+    const ci=d.meals.reduce((a,m)=>a+m.cal,0),cb=d.ex.reduce((a,e)=>a+e.cal,0);
+    const def=G.cal?(G.cal-ci+cb):null;
+    const dc=def==null?'—':def>=800?`<span class="chip chip-g">+${def}</span>`:def<0?`<span class="chip chip-r">${def}</span>`:`<span class="chip chip-w">+${def}</span>`;
+    const lbl=new Date(date+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return`<tr><td style="font-weight:700;color:var(--text)">${lbl}</td><td>${d.weight?d.weight+'kg':'—'}</td><td>${ci||'—'}</td><td>${cb||'—'}</td><td>${d.steps!=null?d.steps.toLocaleString():'—'}</td><td>${d.water?d.water+'ml':'—'}</td><td>${d.sleep?d.sleep.hrs+'h':'—'}</td><td>${dc}</td></tr>`;
+  }).join('');
+}
+
+// CLEAR
+function clearAll(){
+  if(!confirm('Delete all data?'))return;
+  localStorage.removeItem('vt_d');localStorage.removeItem('vt_g');
+  D={};G={cal:null,steps:10000,water:2500};
+  rDash();rHist();toast('Cleared');
+}
+
+init();rDash();
+</script>
+</body>
+</html>
