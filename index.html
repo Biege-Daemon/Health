@@ -428,6 +428,82 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- ── EDIT MODAL ── -->
+<div id="edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch" onclick="closeEdit(event)">
+  <div id="edit-sheet" style="background:var(--s1);border-radius:16px 16px 0 0;position:absolute;bottom:0;left:0;right:0;padding:20px 18px 32px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-size:16px;font-weight:600" id="edit-title">Edit Day</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="edit-date-lbl"></div>
+      </div>
+      <button onclick="closeEdit()" style="background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:7px 14px;font-size:13px;cursor:pointer;font-family:'DM Sans'">Done</button>
+    </div>
+
+    <!-- Calories -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Meals</div>
+    <div id="edit-meals-list" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <input type="text" id="edit-m-name" placeholder="Food name" style="flex:2;min-width:120px">
+      <input type="number" id="edit-m-cal" placeholder="kcal" inputmode="numeric" style="flex:1;min-width:70px">
+      <button class="btn btn-ghost btn-sm" onclick="editAddMeal()" style="white-space:nowrap">+ Add</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px">
+
+    <!-- Steps -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Steps</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="number" id="edit-steps" placeholder="e.g. 8500" inputmode="numeric" style="flex:1">
+      <button class="btn btn-ghost btn-sm" onclick="editSaveSteps()">Save</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px">
+
+    <!-- Exercise -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Exercise</div>
+    <div id="edit-ex-list" style="margin-bottom:8px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <input type="text" id="edit-ex-type" placeholder="Type (e.g. Running)">
+      <input type="number" id="edit-ex-dur" placeholder="mins" inputmode="numeric">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="number" id="edit-ex-cal" placeholder="kcal burned" inputmode="numeric" style="flex:1">
+      <button class="btn btn-ghost btn-sm" onclick="editAddEx()">+ Add</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px">
+
+    <!-- Water -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Water (ml)</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="number" id="edit-water" placeholder="e.g. 2000" inputmode="numeric" style="flex:1">
+      <button class="btn btn-ghost btn-sm" onclick="editSaveWater()">Save</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px">
+
+    <!-- Sleep -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Sleep</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label class="fl">Bedtime</label><input type="time" id="edit-bed" value="22:30"></div>
+      <div><label class="fl">Wake up</label><input type="time" id="edit-wake" value="06:30"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <select id="edit-sleep-q" style="flex:1"><option value="—">Not rated</option><option>Poor</option><option>Fair</option><option>Good</option><option>Great</option></select>
+      <button class="btn btn-ghost btn-sm" onclick="editSaveSleep()">Save</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px">
+
+    <!-- Weight -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Weight (kg)</div>
+    <div style="display:flex;gap:8px">
+      <input type="number" id="edit-weight" placeholder="e.g. 75.4" step="0.1" inputmode="decimal" style="flex:1">
+      <button class="btn btn-ghost btn-sm" onclick="editSaveWeight()">Save</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- end body -->
 
 <nav>
@@ -787,11 +863,113 @@ function rHist(){
   empty.style.display='none';
   tbody.innerHTML=entries.map(([date,d])=>{
     const ci=d.meals.reduce((a,m)=>a+m.cal,0),cb=d.ex.reduce((a,e)=>a+e.cal,0);
-    const def=G.cal?(G.cal-ci+cb):null;
-    const dc=def==null?'—':def>=800?`<span class="chip chip-g">+${def}</span>`:def<0?`<span class="chip chip-r">${def}</span>`:`<span class="chip chip-w">+${def}</span>`;
+    const stepsBurn=d.steps!=null?Math.round(d.steps*0.045):0;
+    const tef=Math.round(ci*0.10);
+    const totalBurn=BMR+cb+stepsBurn+tef+200;
+    const def=ci>0?(totalBurn-ci):null;
+    const dc=def==null?'—':def>=1100?`<span class="chip chip-g">+${def}</span>`:def<0?`<span class="chip chip-r">${def}</span>`:`<span class="chip chip-w">+${def}</span>`;
     const lbl=new Date(date+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-    return`<tr><td style="font-weight:700;color:var(--text)">${lbl}</td><td>${d.weight?d.weight+'kg':'—'}</td><td>${ci||'—'}</td><td>${cb||'—'}</td><td>${d.steps!=null?d.steps.toLocaleString():'—'}</td><td>${d.water?d.water+'ml':'—'}</td><td>${d.sleep?d.sleep.hrs+'h':'—'}</td><td>${dc}</td></tr>`;
+    return`<tr style="cursor:pointer" onclick="openEdit('${date}')">
+      <td style="font-weight:700;color:var(--lime)">${lbl} <span style="font-size:9px;color:var(--muted)">✎</span></td>
+      <td>${d.weight?d.weight+'kg':'—'}</td><td>${ci||'—'}</td><td>${cb||'—'}</td>
+      <td>${d.steps!=null?d.steps.toLocaleString():'—'}</td><td>${d.water?d.water+'ml':'—'}</td>
+      <td>${d.sleep?d.sleep.hrs+'h':'—'}</td><td>${dc}</td></tr>`;
   }).join('');
+}
+
+// EDIT
+let editDate=null;
+function openEdit(date){
+  editDate=date;
+  const d=day(date);
+  const lbl=new Date(date+'T12:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('edit-date-lbl').textContent=lbl;
+  document.getElementById('edit-title').textContent='Edit Day';
+  // prefill
+  document.getElementById('edit-steps').value=d.steps!=null?d.steps:'';
+  document.getElementById('edit-water').value=d.water||'';
+  document.getElementById('edit-weight').value=d.weight||'';
+  if(d.sleep){
+    document.getElementById('edit-bed').value=d.sleep.bed||'22:30';
+    document.getElementById('edit-wake').value=d.sleep.wake||'06:30';
+    document.getElementById('edit-sleep-q').value=d.sleep.q||'—';
+  }
+  renderEditMeals();renderEditEx();
+  document.getElementById('edit-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeEdit(e){
+  if(e&&e.target!==document.getElementById('edit-overlay'))return;
+  document.getElementById('edit-overlay').style.display='none';
+  document.body.style.overflow='';
+  editDate=null;
+  rDash();rHist();
+}
+function renderEditMeals(){
+  const d=day(editDate);
+  const el=document.getElementById('edit-meals-list');
+  el.innerHTML=!d.meals.length?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">No meals</div>':
+    d.meals.map(m=>`<div class="log-item" style="margin-bottom:6px">
+      <div style="min-width:0;flex:1"><div class="log-name">${m.name}</div><div class="log-meta">${m.type||''} · ${m.cal} kcal</div></div>
+      <button class="del" onclick="editDelMeal(${m.id})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`).join('');
+}
+function editAddMeal(){
+  const name=document.getElementById('edit-m-name').value.trim();
+  const cal=parseInt(document.getElementById('edit-m-cal').value);
+  if(!name||!cal){toast('Enter name and calories');return;}
+  day(editDate).meals.push({id:Date.now(),name,cal,type:'Meal',prot:0,carbs:0,t:'—'});
+  save();renderEditMeals();toast('Added');
+}
+function editDelMeal(id){
+  day(editDate).meals=day(editDate).meals.filter(m=>m.id!==id);
+  save();renderEditMeals();
+}
+function renderEditEx(){
+  const d=day(editDate);
+  const el=document.getElementById('edit-ex-list');
+  el.innerHTML=!d.ex.length?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">No exercise</div>':
+    d.ex.map(e=>`<div class="log-item" style="margin-bottom:6px">
+      <div style="min-width:0;flex:1"><div class="log-name">${e.type}</div><div class="log-meta">${e.dur}min · ${e.cal} kcal</div></div>
+      <button class="del" onclick="editDelEx(${e.id})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`).join('');
+}
+function editAddEx(){
+  const type=document.getElementById('edit-ex-type').value.trim()||'Exercise';
+  const dur=parseInt(document.getElementById('edit-ex-dur').value)||0;
+  const cal=parseInt(document.getElementById('edit-ex-cal').value);
+  if(!cal){toast('Enter calories burned');return;}
+  day(editDate).ex.push({id:Date.now(),type,dur,cal,intensity:'—',notes:'',t:'—'});
+  save();renderEditEx();toast('Added');
+}
+function editDelEx(id){
+  day(editDate).ex=day(editDate).ex.filter(e=>e.id!==id);
+  save();renderEditEx();
+}
+function editSaveSteps(){
+  const v=parseInt(document.getElementById('edit-steps').value);
+  if(isNaN(v)||v<0){toast('Enter valid steps');return;}
+  day(editDate).steps=v;save();toast('Steps saved');
+}
+function editSaveWater(){
+  const v=parseInt(document.getElementById('edit-water').value);
+  if(!v||v<0){toast('Enter valid amount');return;}
+  day(editDate).water=v;save();toast('Water saved');
+}
+function editSaveSleep(){
+  const bed=document.getElementById('edit-bed').value;
+  const wake=document.getElementById('edit-wake').value;
+  const q=document.getElementById('edit-sleep-q').value;
+  if(!bed||!wake){toast('Set both times');return;}
+  const [bh,bm]=bed.split(':').map(Number),[wh,wm]=wake.split(':').map(Number);
+  let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;
+  day(editDate).sleep={bed,wake,hrs:+(m/60).toFixed(1),q,notes:''};
+  save();toast('Sleep saved');
+}
+function editSaveWeight(){
+  const v=parseFloat(document.getElementById('edit-weight').value);
+  if(!v||v<=0){toast('Enter valid weight');return;}
+  day(editDate).weight=v;save();toast('Weight saved');
 }
 
 // CLEAR
