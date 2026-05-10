@@ -208,6 +208,7 @@ tr:last-child td{border-bottom:none}
         <span class="stat-label">Total burned</span>
         <span class="stat-val" id="d-cal-burn" style="color:var(--red)">—</span>
       </div>
+      <div id="d-cal-burn-sub" style="font-size:11px;color:var(--muted);line-height:1.4"></div>
     </div>
     <div class="stat-row">
       <span class="stat-label">Steps</span>
@@ -974,8 +975,8 @@ function editSaveWeight(){
 // CLEAR
 function clearAll(){
   if(!confirm('Delete all data?'))return;
-  localStorage.removeItem('vt_d');localStorage.removeItem('vt_g');
-  D={};G={cal:null,steps:10000,water:2500};
+  localStorage.removeItem('vt_d');
+  D={};
   rDash();rHist();toast('Cleared');
 }
 
