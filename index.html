@@ -234,8 +234,9 @@ tr:last-child td{border-bottom:none}
 
   <!-- Week scores -->
   <div class="card">
-    <div class="card-title">This Week</div>
+    <div class="card-title">This Week <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);font-size:11px">· tap a day</span></div>
     <div class="week-scores" id="d-week"></div>
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px" id="d-week-label">Weekly Averages</div>
     <div id="d-week-avgs"></div>
   </div>
 </div>
@@ -583,18 +584,19 @@ function drawBars(containerId,values,color,today){
   const hasData=values.some(v=>v>0);
   if(!hasData){el.innerHTML='<div class="no-data">No data this week</div>';return;}
   const max=Math.max(...values,1);
-  const days=['S','S','M','T','W','T','F','S','S','S','S'].slice(0,7);
   const dates=last7();
   const dnames=dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short'}).slice(0,1).toUpperCase());
   el.innerHTML=`<div class="bars">${values.map((v,i)=>{
     const pct=v>0?Math.round((v/max)*100):0;
     const isToday=dates[i]===today;
     const col=isToday?color:color+'55';
-    return`<div class="bar-col">
+    const lbl=new Date(dates[i]+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    return`<div class="bar-col" onclick="showBarDay(this,'${dates[i]}','${v||0}','${lbl}')" style="cursor:pointer">
       <div class="bar-col-inner"><div class="bar-b" style="width:100%;height:${pct}%;background:${col}"></div></div>
       <div class="bar-day ${isToday?'today':''}">${dnames[i]}</div>
     </div>`;
-  }).join('')}</div>`;
+  }).join('')}</div>
+  <div id="bar-day-info-${containerId}" style="font-size:12px;color:var(--muted);margin-top:8px;min-height:18px"></div>`;
 }
 
 // MEALS
@@ -824,7 +826,7 @@ function rDash(){
     }
     const col=score==null?'var(--dim)':score>=80?'var(--lime)':score>=60?'var(--amber)':score>=40?'var(--red)':'var(--red)';
     const isToday=date===today;
-    return`<div class="ws-day">
+    return`<div class="ws-day" onclick="showDayData('${date}')" style="cursor:pointer">
       <div class="ws-name">${dnames[i]}</div>
       <div class="ws-dot ${isToday?'today':''}" style="border-color:${score!=null?col:'var(--border)'};color:${col}">
         ${score!=null?score:'—'}
@@ -833,20 +835,61 @@ function rDash(){
   }).join('');
 
   // week averages
+  renderWeekAvgs(null);
+}
+
+function showDayData(date){
+  // highlight selected dot
+  document.querySelectorAll('.ws-dot').forEach(d=>d.style.outline='none');
+  const dots=document.querySelectorAll('.ws-day');
+  const dates=last7();
+  const idx=dates.indexOf(date);
+  if(idx>=0&&dots[idx])dots[idx].querySelector('.ws-dot').style.outline='2px solid white';
+  renderWeekAvgs(date);
+}
+
+function renderWeekAvgs(selectedDate){
+  const g=G.cal;
+  const dates=last7();
+  const isSpecific=selectedDate!=null;
   const w7=dates.map(d=>D[d]);
-  const avgCal=wavg(w7.map(d=>d?d.meals.reduce((a,m)=>a+m.cal,0):null));
-  const avgSteps=wavg(w7.map(d=>d&&d.steps!=null?d.steps:null));
-  const avgWater=wavg(w7.map(d=>d?d.water||0:null));
-  const avgSleep=wavg(w7.map(d=>d&&d.sleep?d.sleep.hrs:null));
-  const avgEx=wavg(w7.map(d=>d?d.ex.reduce((a,e)=>a+e.dur,0):null));
-  const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
-  const rows=[
-    {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Avg calories',v:avgCal?avgCal+' kcal':'—',c:g&&avgCal?(avgCal<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
-    {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Avg steps',v:avgSteps?avgSteps.toLocaleString():'—',c:avgSteps?(avgSteps>=TARGETS.steps?'var(--lime)':avgSteps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
-    {i:icon('<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'),l:'Avg water',v:avgWater?avgWater+'ml':'—',c:avgWater?(avgWater>=TARGETS.water?'var(--lime)':avgWater>=TARGETS.water*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
-    {i:icon('<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>'),l:'Avg sleep',v:avgSleep?avgSleep+'h':'—',c:avgSleep?(avgSleep>=7?'var(--lime)':avgSleep>=6?'var(--amber)':'var(--red)'):'var(--muted)'},
-    {i:icon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),l:'Avg exercise',v:avgEx?avgEx+' min':'—',c:avgEx?(avgEx>=30?'var(--lime)':avgEx>=15?'var(--amber)':'var(--red)'):'var(--muted)'},
-  ];
+
+  let rows;
+  if(isSpecific){
+    const dd=D[selectedDate];
+    const lbl=new Date(selectedDate+'T12:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+    const ci=dd?dd.meals.reduce((a,m)=>a+m.cal,0):0;
+    const steps=dd?.steps??null;
+    const water=dd?.water||0;
+    const sleep=dd?.sleep||null;
+    const exMins=dd?dd.ex.reduce((a,e)=>a+e.dur,0):0;
+    const wt=dd?.weight||null;
+    const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+    document.getElementById('d-week-label').textContent=lbl;
+    rows=[
+      {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Calories',v:ci?ci+' kcal':'—',c:ci?(ci<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
+      {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Steps',v:steps!=null?steps.toLocaleString():'—',c:steps!=null?(steps>=TARGETS.steps?'var(--lime)':steps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'),l:'Water',v:water?water+'ml':'—',c:water?(water>=TARGETS.water?'var(--lime)':water>=TARGETS.water*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>'),l:'Sleep',v:sleep?sleep.hrs+'h ('+sleep.q+')':'—',c:sleep?(sleep.hrs>=7?'var(--lime)':sleep.hrs>=6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),l:'Exercise',v:exMins?exMins+' min':'—',c:exMins?(exMins>=TARGETS.exercise?'var(--lime)':exMins>=15?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'),l:'Weight',v:wt?wt+' kg':'—',c:'var(--text)'},
+    ];
+  } else {
+    const avgCal=wavg(w7.map(d=>d?d.meals.reduce((a,m)=>a+m.cal,0):null));
+    const avgSteps=wavg(w7.map(d=>d&&d.steps!=null?d.steps:null));
+    const avgWater=wavg(w7.map(d=>d?d.water||0:null));
+    const avgSleep=wavg(w7.map(d=>d&&d.sleep?d.sleep.hrs:null));
+    const avgEx=wavg(w7.map(d=>d?d.ex.reduce((a,e)=>a+e.dur,0):null));
+    const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+    document.getElementById('d-week-label').textContent='Weekly Averages';
+    rows=[
+      {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Avg calories',v:avgCal?avgCal+' kcal':'—',c:g&&avgCal?(avgCal<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
+      {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Avg steps',v:avgSteps?avgSteps.toLocaleString():'—',c:avgSteps?(avgSteps>=TARGETS.steps?'var(--lime)':avgSteps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'),l:'Avg water',v:avgWater?avgWater+'ml':'—',c:avgWater?(avgWater>=TARGETS.water?'var(--lime)':avgWater>=TARGETS.water*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>'),l:'Avg sleep',v:avgSleep?avgSleep+'h':'—',c:avgSleep?(avgSleep>=7?'var(--lime)':avgSleep>=6?'var(--amber)':'var(--red)'):'var(--muted)'},
+      {i:icon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),l:'Avg exercise',v:avgEx?avgEx+' min':'—',c:avgEx?(avgEx>=TARGETS.exercise?'var(--lime)':avgEx>=15?'var(--amber)':'var(--red)'):'var(--muted)'},
+    ];
+  }
   document.getElementById('d-week-avgs').innerHTML=rows.map(r=>`
     <div class="sum-row" style="border-left:2px solid ${r.c}">
       <span style="color:${r.c}">${r.i}</span>
@@ -854,8 +897,13 @@ function rDash(){
       <span class="sum-val" style="color:${r.c}">${r.v}</span>
     </div>`).join('');
 }
-
-// HISTORY
+function showBarDay(colEl,date,val,lbl){
+  const parent=colEl.parentElement;
+  parent.querySelectorAll('.bar-col').forEach(c=>c.querySelector('.bar-b').style.opacity='0.4');
+  colEl.querySelector('.bar-b').style.opacity='1';
+  const infoEl=colEl.closest('[id^="wc-"]')?.querySelector('[id^="bar-day-info-"]');
+  if(infoEl) infoEl.textContent=lbl+': '+(+val>0?val:'No data');
+}
 function rHist(){
   const entries=Object.entries(D).sort(([a],[b])=>b.localeCompare(a));
   const tbody=document.getElementById('hist-body'),empty=document.getElementById('hist-empty');
@@ -903,7 +951,13 @@ function closeEdit(e){
   document.getElementById('edit-overlay').style.display='none';
   document.body.style.overflow='';
   editDate=null;
-  rDash();rHist();
+  // refresh whichever page is active
+  const active=document.querySelector('.pg.on');
+  if(active){
+    const pg=active.id.replace('pg-','');
+    ({dash:rDash,cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
+  }
+  rDash();
 }
 function renderEditMeals(){
   const d=day(editDate);
