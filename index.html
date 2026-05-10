@@ -174,19 +174,19 @@ tr:last-child td{border-bottom:none}
 <!-- ── DASHBOARD ── -->
 <div class="pg on" id="pg-dash">
   <div class="pg-title" id="greeting">Today</div>
-  <div class="pg-sub">Here's where you stand</div>
+  <div class="pg-sub" id="dash-day-label">Here's where you stand</div>
 
   <!-- Deficit -->
   <div class="def-block">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div>
-        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Calorie Deficit · BMR + Steps + Exercise + TEF + NEAT − Intake</div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Calorie Deficit</div>
         <div class="def-num" id="d-deficit" style="color:var(--lime)">—</div>
-        <div class="def-label" id="d-def-sub">Set calorie goal first</div>
+        <div class="def-label" id="d-def-sub">Log a meal to calculate your deficit</div>
       </div>
       <div style="text-align:right">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Target</div>
-        <div style="font-family:'DM Sans';font-size:20px;font-weight:700;color:var(--lime)">≥1,100</div>
+        <div style="font-size:20px;font-weight:700;color:var(--lime)">≥1,100</div>
         <div style="font-size:11px;color:var(--muted)">kcal/day</div>
       </div>
     </div>
@@ -196,19 +196,16 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
-  <!-- Today's metrics -->
+  <!-- Stats -->
   <div class="card">
-    <div class="card-title">Today</div>
+    <div class="card-title" id="d-today-title">Today</div>
     <div class="stat-row">
       <span class="stat-label">Calories in</span>
       <span class="stat-val" id="d-cal-in" style="color:var(--lime)">—</span>
     </div>
-    <div class="stat-row" style="flex-direction:column;align-items:flex-start;gap:3px">
-      <div style="display:flex;width:100%;justify-content:space-between;align-items:baseline">
-        <span class="stat-label">Total burned</span>
-        <span class="stat-val" id="d-cal-burn" style="color:var(--red)">—</span>
-      </div>
-      <div id="d-cal-burn-sub" style="font-size:11px;color:var(--muted);line-height:1.4"></div>
+    <div class="stat-row">
+      <span class="stat-label">Total burned</span>
+      <span class="stat-val" id="d-cal-burn" style="color:var(--red)">—</span>
     </div>
     <div class="stat-row">
       <span class="stat-label">Steps</span>
@@ -232,11 +229,35 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
+  <!-- Meals breakdown -->
+  <div class="card" id="d-meals-card">
+    <div class="card-title">Meals</div>
+    <div id="d-meals-list"><div class="empty">No meals logged</div></div>
+  </div>
+
+  <!-- Exercise breakdown -->
+  <div class="card" id="d-ex-card">
+    <div class="card-title">Exercise</div>
+    <div id="d-ex-list"><div class="empty">No exercise logged</div></div>
+  </div>
+
+  <!-- Water breakdown -->
+  <div class="card" id="d-water-card">
+    <div class="card-title">Water</div>
+    <div id="d-water-detail"></div>
+  </div>
+
+  <!-- Sleep breakdown -->
+  <div class="card" id="d-sleep-card">
+    <div class="card-title">Sleep</div>
+    <div id="d-sleep-detail"><div class="empty">No sleep logged</div></div>
+  </div>
+
   <!-- Week scores -->
   <div class="card">
     <div class="card-title">This Week <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);font-size:11px">· tap a day</span></div>
     <div class="week-scores" id="d-week"></div>
-    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px" id="d-week-label">Weekly Averages</div>
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;margin-top:4px" id="d-week-label">Weekly Averages</div>
     <div id="d-week-avgs"></div>
   </div>
 </div>
@@ -357,16 +378,23 @@ tr:last-child td{border-bottom:none}
 
   <div class="card">
     <div class="card-title">Water — Target: 2,500 ml</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Tap a glass to add 250ml</div>
-    <div class="glasses" id="glasses"></div>
+    <div class="bar-wrap" style="margin-top:0;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span id="water-disp" style="font-size:22px;font-weight:700;color:var(--cyan)">0 ml</span>
+        <span id="water-pct" style="font-size:13px;color:var(--muted)">0% of 2,500ml</span>
+      </div>
+      <div class="bar-track" style="height:8px"><div class="bar-fill" id="water-bar" style="background:var(--cyan);width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+      <div class="glass" onclick="addWater(250)" style="width:52px;height:52px;flex-shrink:0;border-radius:10px">
+        <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">Tap the glass<br>to add <b style="color:var(--cyan)">250ml</b></div>
+    </div>
     <div class="row">
       <input type="number" id="water-custom" placeholder="Custom ml" inputmode="numeric">
       <button class="btn btn-ghost btn-sm" onclick="addWaterCustom()">Add</button>
       <button class="btn btn-danger btn-sm" onclick="resetWater()">Reset</button>
-    </div>
-    <div class="bar-wrap">
-      <div class="bar-track"><div class="bar-fill" id="water-bar" style="background:var(--cyan);width:0%"></div></div>
-      <div class="bar-meta"><span id="water-disp">0 ml</span><span id="water-pct">0%</span></div>
     </div>
   </div>
 
@@ -550,7 +578,8 @@ function go(pg,el){
   el.classList.add('on');
   document.getElementById('pg-'+pg).classList.add('on');
   document.getElementById('body').scrollTop=0;
-  ({dash:rDash,cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
+  if(pg==='dash'){dashDate=null;rDash();}
+  else ({cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
 }
 
 // TOAST
@@ -737,8 +766,7 @@ function rWell(){
   const pct=Math.min(100,Math.round((w/wg)*100));
   document.getElementById('water-bar').style.width=pct+'%';
   document.getElementById('water-disp').textContent=w+' ml';
-  document.getElementById('water-pct').textContent=pct+'%';
-  drawGlasses();
+  document.getElementById('water-pct').textContent=pct+'% of '+wg+'ml';
   if(d.sleep){
     document.getElementById('sl-hrs').textContent=d.sleep.hrs+'h';
     document.getElementById('sl-q').textContent=d.sleep.q;
@@ -768,30 +796,36 @@ function rWell(){
 }
 
 // DASHBOARD
-const BMR=1818; // Mifflin-St Jeor: male, 75kg, 175cm, 23yo
+const BMR=1818;
+let dashDate=null; // null = today
 
-function rDash(){
-  const d=day(),g=G.cal;
+function rDash(date){
+  const viewDate=date||td();
+  const d=D[viewDate]||{meals:[],ex:[],steps:null,water:0,sleep:null,weight:null};
+  const g=G.cal;
   const calIn=d.meals.reduce((a,m)=>a+m.cal,0);
   const calBurn=d.ex.reduce((a,e)=>a+e.cal,0);
-  // Full calorie burn breakdown
   const stepsBurn=d.steps!=null?Math.round(d.steps*0.045):0;
   const tef=Math.round(calIn*0.10);
-  const neatBase=200;
-  const totalBurn=BMR+calBurn+stepsBurn+tef+neatBase;
-  // Real deficit = total burn - net intake (intake already reduced by TEF above)
+  const totalBurn=BMR+calBurn+stepsBurn+tef+200;
   const deficit=d.meals.length>0?(totalBurn-calIn):null;
-  const steps=d.steps,water=d.water||0,sleep=d.sleep,wt=d.weight;
   const exMins=d.ex.reduce((a,e)=>a+e.dur,0);
+  const water=d.water||0;
 
+  // subtitle label
+  const isToday=viewDate===td();
+  const dayLbl=isToday?'Here\'s where you stand':new Date(viewDate+'T12:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('dash-day-label').textContent=dayLbl;
+  document.getElementById('d-today-title').textContent=isToday?'Today':new Date(viewDate+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+
+  // stats
   document.getElementById('d-cal-in').textContent=calIn?calIn+' kcal':'—';
-  document.getElementById('d-cal-burn').textContent=totalBurn+' kcal total';
-  document.getElementById('d-cal-burn-sub').textContent=`BMR ${BMR}  +  steps ${stepsBurn}  +  ex ${calBurn}  +  TEF ${tef}  +  NEAT ${neatBase}`;
-  document.getElementById('d-steps').textContent=steps!=null?steps.toLocaleString()+' / '+TARGETS.steps.toLocaleString():'—';
+  document.getElementById('d-cal-burn').textContent=d.meals.length||d.ex.length||d.steps!=null?totalBurn+' kcal':'—';
+  document.getElementById('d-steps').textContent=d.steps!=null?d.steps.toLocaleString()+' / '+TARGETS.steps.toLocaleString():'—';
   document.getElementById('d-water').textContent=water?water+' / '+TARGETS.water+'ml':'0 / '+TARGETS.water+'ml';
-  document.getElementById('d-sleep').textContent=sleep?sleep.hrs+'h ('+sleep.q+')':'—';
+  document.getElementById('d-sleep').textContent=d.sleep?d.sleep.hrs+'h ('+d.sleep.q+')':'—';
   document.getElementById('d-exercise').textContent=d.ex.length?exMins+' min, '+calBurn+' kcal':'—';
-  document.getElementById('d-weight').textContent=wt?wt+' kg':'—';
+  document.getElementById('d-weight').textContent=d.weight?d.weight+' kg':'—';
 
   // deficit
   const de=document.getElementById('d-deficit'),ds=document.getElementById('d-def-sub');
@@ -807,7 +841,38 @@ function rDash(){
     document.getElementById('d-def-bar').style.width='0%';
   }
 
-  // week dots — simple score per day
+  // meals breakdown
+  document.getElementById('d-meals-list').innerHTML=!d.meals.length?'<div class="empty">No meals logged</div>':
+    d.meals.map(m=>`<div class="log-item">
+      <div style="min-width:0;flex:1"><div class="log-name">${m.name}</div><div class="log-meta">${m.type} · ${m.t}</div></div>
+      <div class="log-val" style="color:var(--lime)">${m.cal} kcal</div>
+    </div>`).join('');
+
+  // exercise breakdown
+  document.getElementById('d-ex-list').innerHTML=!d.ex.length?'<div class="empty">No exercise logged</div>':
+    d.ex.map(e=>`<div class="log-item">
+      <div style="min-width:0;flex:1"><div class="log-name">${e.type}</div><div class="log-meta">${e.dur} min · ${e.intensity}</div></div>
+      <div class="log-val" style="color:var(--red)">${e.cal} kcal</div>
+    </div>`).join('');
+
+  // water breakdown
+  const wpct=Math.min(100,Math.round((water/TARGETS.water)*100));
+  document.getElementById('d-water-detail').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+      <span style="font-size:20px;font-weight:700;color:var(--cyan)">${water} ml</span>
+      <span style="font-size:13px;color:var(--muted)">${wpct}% of ${TARGETS.water}ml</span>
+    </div>
+    <div class="bar-track" style="height:8px"><div class="bar-fill" style="background:var(--cyan);width:${wpct}%"></div></div>`;
+
+  // sleep breakdown
+  document.getElementById('d-sleep-detail').innerHTML=!d.sleep?'<div class="empty">No sleep logged</div>':`
+    <div class="g2">
+      <div class="mbox"><div class="mbox-val" style="color:var(--amber)">${d.sleep.hrs}h</div><div class="mbox-lbl">Duration</div></div>
+      <div class="mbox"><div class="mbox-val">${d.sleep.q}</div><div class="mbox-lbl">Quality</div></div>
+    </div>
+    ${d.sleep.notes?`<div style="font-size:12px;color:var(--muted);margin-top:10px">${d.sleep.notes}</div>`:''}`;
+
+  // week dots
   const dates=last7(),today=td();
   const dnames=dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('en-IN',{weekday:'short'}).slice(0,1).toUpperCase());
   document.getElementById('d-week').innerHTML=dates.map((date,i)=>{
@@ -825,63 +890,53 @@ function rDash(){
       if(n>0)score=Math.round((s/n)*100);
     }
     const col=score==null?'var(--dim)':score>=80?'var(--lime)':score>=60?'var(--amber)':score>=40?'var(--red)':'var(--red)';
-    const isToday=date===today;
+    const isSelected=date===viewDate;
     return`<div class="ws-day" onclick="showDayData('${date}')" style="cursor:pointer">
       <div class="ws-name">${dnames[i]}</div>
-      <div class="ws-dot ${isToday?'today':''}" style="border-color:${score!=null?col:'var(--border)'};color:${col}">
+      <div class="ws-dot ${date===today?'today':''}" style="border-color:${isSelected?'white':score!=null?col:'var(--border)'};color:${col};${isSelected?'outline:2px solid white;outline-offset:2px':''}">
         ${score!=null?score:'—'}
       </div>
     </div>`;
   }).join('');
 
-  // week averages
-  renderWeekAvgs(null);
+  renderWeekAvgs(isToday?null:viewDate);
 }
 
 function showDayData(date){
-  // highlight selected dot
-  document.querySelectorAll('.ws-dot').forEach(d=>d.style.outline='none');
-  const dots=document.querySelectorAll('.ws-day');
-  const dates=last7();
-  const idx=dates.indexOf(date);
-  if(idx>=0&&dots[idx])dots[idx].querySelector('.ws-dot').style.outline='2px solid white';
-  renderWeekAvgs(date);
+  dashDate=date;
+  rDash(date);
+  document.getElementById('body').scrollTop=0;
 }
 
 function renderWeekAvgs(selectedDate){
   const g=G.cal;
   const dates=last7();
-  const isSpecific=selectedDate!=null;
   const w7=dates.map(d=>D[d]);
-
   let rows;
-  if(isSpecific){
+  const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  if(selectedDate){
     const dd=D[selectedDate];
     const lbl=new Date(selectedDate+'T12:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+    document.getElementById('d-week-label').textContent=lbl;
     const ci=dd?dd.meals.reduce((a,m)=>a+m.cal,0):0;
     const steps=dd?.steps??null;
     const water=dd?.water||0;
     const sleep=dd?.sleep||null;
     const exMins=dd?dd.ex.reduce((a,e)=>a+e.dur,0):0;
-    const wt=dd?.weight||null;
-    const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
-    document.getElementById('d-week-label').textContent=lbl;
     rows=[
       {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Calories',v:ci?ci+' kcal':'—',c:ci?(ci<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
       {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Steps',v:steps!=null?steps.toLocaleString():'—',c:steps!=null?(steps>=TARGETS.steps?'var(--lime)':steps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
       {i:icon('<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'),l:'Water',v:water?water+'ml':'—',c:water?(water>=TARGETS.water?'var(--lime)':water>=TARGETS.water*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
       {i:icon('<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>'),l:'Sleep',v:sleep?sleep.hrs+'h ('+sleep.q+')':'—',c:sleep?(sleep.hrs>=7?'var(--lime)':sleep.hrs>=6?'var(--amber)':'var(--red)'):'var(--muted)'},
       {i:icon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),l:'Exercise',v:exMins?exMins+' min':'—',c:exMins?(exMins>=TARGETS.exercise?'var(--lime)':exMins>=15?'var(--amber)':'var(--red)'):'var(--muted)'},
-      {i:icon('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'),l:'Weight',v:wt?wt+' kg':'—',c:'var(--text)'},
     ];
   } else {
+    document.getElementById('d-week-label').textContent='Weekly Averages';
     const avgCal=wavg(w7.map(d=>d?d.meals.reduce((a,m)=>a+m.cal,0):null));
     const avgSteps=wavg(w7.map(d=>d&&d.steps!=null?d.steps:null));
     const avgWater=wavg(w7.map(d=>d?d.water||0:null));
     const avgSleep=wavg(w7.map(d=>d&&d.sleep?d.sleep.hrs:null));
     const avgEx=wavg(w7.map(d=>d?d.ex.reduce((a,e)=>a+e.dur,0):null));
-    const icon=(path)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
-    document.getElementById('d-week-label').textContent='Weekly Averages';
     rows=[
       {i:icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'),l:'Avg calories',v:avgCal?avgCal+' kcal':'—',c:g&&avgCal?(avgCal<=g?'var(--lime)':'var(--red)'):'var(--muted)'},
       {i:icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),l:'Avg steps',v:avgSteps?avgSteps.toLocaleString():'—',c:avgSteps?(avgSteps>=TARGETS.steps?'var(--lime)':avgSteps>=TARGETS.steps*.6?'var(--amber)':'var(--red)'):'var(--muted)'},
@@ -955,9 +1010,9 @@ function closeEdit(e){
   const active=document.querySelector('.pg.on');
   if(active){
     const pg=active.id.replace('pg-','');
-    ({dash:rDash,cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
+    ({dash:()=>rDash(dashDate),cal:rCal,act:rAct,well:rWell,hist:rHist})[pg]?.();
   }
-  rDash();
+  rDash(dashDate);
 }
 function renderEditMeals(){
   const d=day(editDate);
@@ -1030,7 +1085,7 @@ function editSaveWeight(){
 function clearAll(){
   if(!confirm('Delete all data?'))return;
   localStorage.removeItem('vt_d');
-  D={};
+  D={};dashDate=null;
   rDash();rHist();toast('Cleared');
 }
 
